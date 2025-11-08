@@ -1,0 +1,15 @@
+name: needle
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - cmake>=3.26
+  - ninja
+  # optional: on macOS, compilers come from Xcode CLT; on Linux/GitHub CI, system compilers are provided
+  # add platform-specific compilers later if needed
+  # - compilers  # (linux only; omit on macOS)
+  # We intentionally keep Python packages installed via pip to match pyproject versions
+  - pip:
+      - scikit-build-core>=0.9.0
+      - pybind11>=2.12.0
