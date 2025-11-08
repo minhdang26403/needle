@@ -104,19 +104,33 @@ This project is broken down into eight distinct phases.
 
 ## 🚀 Quick Start
 
-### 1. Build from Source (Development)
+### 1. Conda environment (recommended)
 
-This project uses `scikit-build-core` and `CMake` to manage the C++ build process.
+This project uses `scikit-build-core` and `CMake` to manage the C++ build process. We recommend a minimal Conda env for Python/CMake/Ninja, then install Python deps via `pip`.
 
 ```bash
-# 1. Clone the repository
-git clone [https://github.com/YOUR_USERNAME/needle.git](https://github.com/YOUR_USERNAME/needle.git)
+# Clone the repository
+git clone [https://github.com/minhdang26403/needle.git](https://github.com/minhdang26403/needle.git)
 cd needle
 
-# 2. Install in editable mode
-# This will compile the C++ backends
-pip install -e .
+# Create and activate the conda environment
+conda env create -f environment.yml    # creates env named "needle"
+conda activate needle
 
-# 3. Run the tests
-pytest
+# Install the package in editable mode with dev tools
+python -m pip install -U pip
+pip install -e ".[dev]"
+
+# Run tests
+pytest -q
+```
+
+### 2. Plain virtualenv (alternative)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+pip install -e ".[dev]"
+pytest -q
 ```
