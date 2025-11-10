@@ -731,3 +731,12 @@ class NDArray:
         view, out = self.reduce_view_out(axis, keepdims=keepdims)
         self.device.reduce_max(view.compact()._handle, out._handle, view.shape[-1])
         return out
+
+
+def array(
+    a: Any, dtype: str = "float32", device: BackendDevice | None = None
+) -> NDArray:
+    """Convenience methods to match numpy a bit more closely."""
+    dtype = "float32" if dtype is None else dtype
+    assert dtype == "float32"
+    return NDArray(a, device=device)
