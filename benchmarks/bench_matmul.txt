@@ -1,0 +1,5 @@
+Compare 512/1024/1536/2048 squares:
+python benchmarks/bench_matmul.py --sizes "512 1024 1536 2048" --repeats 7 --warmup 1
+
+Mixed sizes
+python benchmarks/bench_matmul.py --sizes "1024,1024,2048 2048,2048,2048" --repeats 5

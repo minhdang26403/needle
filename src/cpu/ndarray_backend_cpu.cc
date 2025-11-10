@@ -18,7 +18,7 @@ constexpr size_t ELEM_SIZE = sizeof(scalar_t);
 /**
  * @brief Contiguous heap allocation aligned to @c ALIGNMENT byte boundaries.
  *
- * Owns a @c float buffer of @c size elements allocated with @c posix_memalign.
+ * Owns a @c scalar_t buffer of @c size elements allocated with @c posix_memalign.
  * The alignment is chosen to be friendly to vectorized math and tiled kernels
  * (at least @c TILE * @c ELEM_SIZE).
  *
@@ -414,17 +414,17 @@ void Matmul(const AlignedArray& a, const AlignedArray& b, AlignedArray* out, uin
  * @param b Pointer to right TILE x TILE block (row-major).
  * @param out Pointer to output TILE x TILE block (row-major), updated with +=.
  */
-inline void AlignedDot(const float* __restrict__ a,
-                       const float* __restrict__ b,
-                       float* __restrict__ out) {
+inline void AlignedDot(const scalar_t* __restrict__ a,
+                       const scalar_t* __restrict__ b,
+                       scalar_t* __restrict__ out) {
 
-  a = (const float*)__builtin_assume_aligned(a, TILE * ELEM_SIZE);
-  b = (const float*)__builtin_assume_aligned(b, TILE * ELEM_SIZE);
-  out = (float*)__builtin_assume_aligned(out, TILE * ELEM_SIZE);
+  a = (const scalar_t*)__builtin_assume_aligned(a, TILE * ELEM_SIZE);
+  b = (const scalar_t*)__builtin_assume_aligned(b, TILE * ELEM_SIZE);
+  out = (scalar_t*)__builtin_assume_aligned(out, TILE * ELEM_SIZE);
 
   for (size_t i = 0; i < TILE; i++) {
     for (size_t j = 0; j < TILE; j++) {
-      float sum = 0;
+      scalar_t sum = 0;
       for (size_t k = 0; k < TILE; k++) {
         sum += a[i * TILE + k] * b[k * TILE + j];
       }

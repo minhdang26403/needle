@@ -17,6 +17,7 @@ _skbuild/
 CMakeCache.txt
 CMakeFiles/
 cmake-build-*/
+compile_commands.json
 
 # IDE / OS
 .DS_Store
