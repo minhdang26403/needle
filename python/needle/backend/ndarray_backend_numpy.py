@@ -452,3 +452,37 @@ def reduce_sum(a: Array, out: Array, reduce_size: int) -> None:
         Size of the reduced dimension.
     """
     out.buffer[:] = np.sum(a.buffer.reshape(-1, reduce_size), axis=1)
+
+
+def zeros(*shape: int, dtype: str = "float64") -> np.ndarray:
+    return np.zeros(shape, dtype=dtype)
+
+
+def ones(*shape: int, dtype: str = "float64") -> np.ndarray:
+    return np.ones(shape, dtype=dtype)
+
+
+def randn(*shape: int) -> np.ndarray:
+    # note: numpy doesn't support types within standard random routines, and
+    # .astype("float64") does work if we're generating a singleton
+    return np.random.randn(*shape)
+
+
+def rand(*shape: int) -> np.ndarray:
+    # note: numpy doesn't support types within standard random routines, and
+    # .astype("float64") does work if we're generating a singleton
+    return np.random.rand(*shape)
+
+
+def one_hot(n: int, i: int, dtype: str = "float64") -> np.ndarray:
+    return np.array(np.eye(n, dtype=dtype)[i])
+
+
+def empty(shape: tuple[int, ...], dtype: str = "float64") -> np.ndarray:
+    return np.empty(shape, dtype=dtype)
+
+
+def full(
+    shape: tuple[int, ...], fill_value: float, dtype: str = "float64"
+) -> np.ndarray:
+    return np.full(shape, fill_value, dtype=dtype)
