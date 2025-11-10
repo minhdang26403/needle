@@ -3,7 +3,7 @@ from typing import Any, Callable, Union, cast
 
 import numpy as np
 
-from .device import BackendDevice, default_device
+from .device import Device, default_device
 
 
 class NDArray:
@@ -18,10 +18,10 @@ class NDArray:
     _shape: tuple[int, ...]
     _strides: tuple[int, ...]
     _offset: int
-    _device: BackendDevice
+    _device: Device
     _handle: Any
 
-    def __init__(self, other: Any, device: BackendDevice | None = None) -> None:
+    def __init__(self, other: Any, device: Device | None = None) -> None:
         """Construct an NDArray from another NDArray, NumPy array, or array-like.
 
         Parameters
@@ -29,7 +29,7 @@ class NDArray:
         other : NDArray | numpy.ndarray | array_like
             Source to create from. If an NDArray, a device-aware copy is made.
             If a NumPy array or array-like, data are copied onto the chosen device.
-        device : BackendDevice | None, optional
+        device : Device | None, optional
             Target device. If omitted and ``other`` is an NDArray, the other's
             device is used; otherwise the global default device is used.
         """
@@ -82,7 +82,7 @@ class NDArray:
     def make(
         shape: tuple[int, ...],
         strides: tuple[int, ...] | None = None,
-        device: BackendDevice | None = None,
+        device: Device | None = None,
         handle: Any = None,
         offset: int = 0,
     ) -> "NDArray":
@@ -94,7 +94,7 @@ class NDArray:
             Desired logical shape.
         strides : tuple of int | None, optional
             Strides in elements. If None, compact strides are computed.
-        device : BackendDevice | None, optional
+        device : Device | None, optional
             Target device. Defaults to the global default device.
         handle : Any, optional
             Existing backend handle representing the storage. If None, new
@@ -132,8 +132,8 @@ class NDArray:
         return self._strides
 
     @property
-    def device(self) -> BackendDevice:
-        """BackendDevice: The device on which this array's storage resides."""
+    def device(self) -> Device:
+        """Device: The device on which this array's storage resides."""
         return self._device
 
     @property
@@ -170,12 +170,12 @@ class NDArray:
         """
         self.device.fill(self._handle, value)
 
-    def to(self, device: BackendDevice) -> "NDArray":
+    def to(self, device: Device) -> "NDArray":
         """Move or copy the array to another device.
 
         Parameters
         ----------
-        device : BackendDevice
+        device : Device
             Target device.
 
         Returns
@@ -733,9 +733,7 @@ class NDArray:
         return out
 
 
-def array(
-    a: Any, dtype: str = "float32", device: BackendDevice | None = None
-) -> NDArray:
+def array(a: Any, dtype: str = "float32", device: Device | None = None) -> NDArray:
     """Convenience methods to match numpy a bit more closely."""
     dtype = "float32" if dtype is None else dtype
     assert dtype == "float32"

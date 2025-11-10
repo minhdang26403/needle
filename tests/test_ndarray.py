@@ -84,7 +84,7 @@ def check_same_memory(original: nd.NDArray, view: nd.NDArray) -> None:
     ],
 )
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_compact(params: dict[str, Any], device: backend_device.BackendDevice) -> None:
+def test_compact(params: dict[str, Any], device: backend_device.Device) -> None:
     shape, np_fn, nd_fn = params["shape"], params["np_fn"], params["nd_fn"]
     _A = np.random.randint(low=0, high=10, size=shape)
     A = nd.array(_A, device=device)
@@ -106,9 +106,7 @@ reduce_params = [
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
 @pytest.mark.parametrize("params", reduce_params)
-def test_reduce_sum(
-    params: dict[str, Any], device: backend_device.BackendDevice
-) -> None:
+def test_reduce_sum(params: dict[str, Any], device: backend_device.Device) -> None:
     dims, axis = params["dims"], params["axis"]
     _A = np.random.randn(*dims)
     A = nd.array(_A, device=device)
@@ -122,9 +120,7 @@ def test_reduce_sum(
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
 @pytest.mark.parametrize("params", reduce_params)
-def test_reduce_max(
-    params: dict[str, Any], device: backend_device.BackendDevice
-) -> None:
+def test_reduce_max(params: dict[str, Any], device: backend_device.Device) -> None:
     dims, axis = params["dims"], params["axis"]
     _A = np.random.randn(*dims)
     A = nd.array(_A, device=device)
@@ -199,9 +195,7 @@ def ShapeAndSlices(*shape: int) -> _ShapeAndSlices:
     ],
 )
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_setitem_ewise(
-    params: dict[str, Any], device: backend_device.BackendDevice
-) -> None:
+def test_setitem_ewise(params: dict[str, Any], device: backend_device.Device) -> None:
     lhs_shape, lhs_slices = params["lhs"]
     rhs_shape, rhs_slices = params["rhs"]
     _A = np.random.randn(*lhs_shape)
@@ -230,7 +224,7 @@ def test_setitem_ewise(
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
 def test_setitem_scalar(
     params: tuple[tuple[int, ...], tuple[slice, ...]],
-    device: backend_device.BackendDevice,
+    device: backend_device.Device,
 ) -> None:
     shape, slices = params
     _A = np.random.randn(*shape)
@@ -287,7 +281,7 @@ ewise_shapes = [(1, 1, 1), (4, 5, 6)]
 def test_ewise_fn(
     fn: Callable[[Any, Any], Any],
     shape: tuple[int, ...],
-    device: backend_device.BackendDevice,
+    device: backend_device.Device,
 ) -> None:
     _A = np.random.randn(*shape)
     _B = np.random.randn(*shape)
@@ -298,9 +292,7 @@ def test_ewise_fn(
 
 @pytest.mark.parametrize("shape", ewise_shapes)
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_ewise_max(
-    shape: tuple[int, ...], device: backend_device.BackendDevice
-) -> None:
+def test_ewise_max(shape: tuple[int, ...], device: backend_device.Device) -> None:
     _A = np.random.randn(*shape)
     _B = np.random.randn(*shape)
     A = nd.array(_A, device=device)
@@ -319,7 +311,7 @@ permute_params = [
 
 @pytest.mark.parametrize("params", permute_params)
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_permute(device: backend_device.BackendDevice, params: dict[str, Any]) -> None:
+def test_permute(device: backend_device.Device, params: dict[str, Any]) -> None:
     dims = params["dims"]
     axes = params["axes"]
     _A = np.random.randn(*dims)
@@ -339,7 +331,7 @@ reshape_params = [
 
 @pytest.mark.parametrize("params", reshape_params)
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_reshape(device: backend_device.BackendDevice, params: dict[str, Any]) -> None:
+def test_reshape(device: backend_device.Device, params: dict[str, Any]) -> None:
     shape = params["shape"]
     new_shape = params["new_shape"]
     _A = np.random.randn(*shape)
@@ -361,7 +353,7 @@ getitem_params = [
 
 @pytest.mark.parametrize("params", getitem_params)
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_getitem(device: backend_device.BackendDevice, params: dict[str, Any]) -> None:
+def test_getitem(device: backend_device.Device, params: dict[str, Any]) -> None:
     fn = params["fn"]
     _A = np.random.randn(5, 5)
     A = nd.array(_A, device=device)
@@ -379,9 +371,7 @@ broadcast_params = [
 
 @pytest.mark.parametrize("params", broadcast_params)
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_broadcast_to(
-    device: backend_device.BackendDevice, params: dict[str, Any]
-) -> None:
+def test_broadcast_to(device: backend_device.Device, params: dict[str, Any]) -> None:
     from_shape, to_shape = params["from_shape"], params["to_shape"]
     _A = np.random.randn(*from_shape)
     A = nd.array(_A, device=device)
@@ -408,7 +398,7 @@ matmul_dims = [
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
 @pytest.mark.parametrize("m,n,p", matmul_dims)
-def test_matmul(m: int, n: int, p: int, device: backend_device.BackendDevice) -> None:
+def test_matmul(m: int, n: int, p: int, device: backend_device.Device) -> None:
     _A = np.random.randn(m, n)
     _B = np.random.randn(n, p)
     A = nd.array(_A, device=device)
@@ -417,21 +407,21 @@ def test_matmul(m: int, n: int, p: int, device: backend_device.BackendDevice) ->
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_scalar_mul(device: backend_device.BackendDevice) -> None:
+def test_scalar_mul(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     np.testing.assert_allclose(A * 5.0, (B * 5.0).numpy(), atol=1e-5, rtol=1e-5)
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_scalar_div(device: backend_device.BackendDevice) -> None:
+def test_scalar_div(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     np.testing.assert_allclose(A / 5.0, (B / 5.0).numpy(), atol=1e-5, rtol=1e-5)
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_scalar_power(device: backend_device.BackendDevice) -> None:
+def test_scalar_power(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     np.testing.assert_allclose(np.power(A, 5.0), (B**5.0).numpy(), atol=1e-5, rtol=1e-5)
@@ -439,7 +429,7 @@ def test_scalar_power(device: backend_device.BackendDevice) -> None:
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_scalar_maximum(device: backend_device.BackendDevice) -> None:
+def test_scalar_maximum(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     C = (np.max(A) + 1.0).item()
@@ -453,7 +443,7 @@ def test_scalar_maximum(device: backend_device.BackendDevice) -> None:
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_scalar_eq(device: backend_device.BackendDevice) -> None:
+def test_scalar_eq(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     C = A[0, 1].item()
@@ -461,7 +451,7 @@ def test_scalar_eq(device: backend_device.BackendDevice) -> None:
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_scalar_ge(device: backend_device.BackendDevice) -> None:
+def test_scalar_ge(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     C = A[0, 1].item()
@@ -469,21 +459,21 @@ def test_scalar_ge(device: backend_device.BackendDevice) -> None:
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_ewise_log(device: backend_device.BackendDevice) -> None:
+def test_ewise_log(device: backend_device.Device) -> None:
     A = np.abs(np.random.randn(5, 5))
     B = nd.array(A, device=device)
     np.testing.assert_allclose(np.log(A), (B.log()).numpy(), atol=1e-5, rtol=1e-5)
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_ewise_exp(device: backend_device.BackendDevice) -> None:
+def test_ewise_exp(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     np.testing.assert_allclose(np.exp(A), (B.exp()).numpy(), atol=1e-5, rtol=1e-5)
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=_DEVICE_IDS)
-def test_ewise_tanh(device: backend_device.BackendDevice) -> None:
+def test_ewise_tanh(device: backend_device.Device) -> None:
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
     np.testing.assert_allclose(np.tanh(A), (B.tanh()).numpy(), atol=1e-5, rtol=1e-5)
