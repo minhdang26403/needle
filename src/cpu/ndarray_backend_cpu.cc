@@ -236,7 +236,7 @@ void ScalarAdd(const AlignedArray& a, scalar_t val, AlignedArray* out) {
  * examples of how they should work.
  *   - EwiseMul, ScalarMul
  *   - EwiseDiv, ScalarDiv
- *   - ScalarPower
+ *   - EwisePower, ScalarPower
  *   - EwiseMaximum, ScalarMaximum
  *   - EwiseEq, ScalarEq
  *   - EwiseGe, ScalarGe
@@ -283,6 +283,15 @@ void EwiseDiv(const AlignedArray& a, const AlignedArray& b, AlignedArray* out) {
 void ScalarDiv(const AlignedArray& a, scalar_t val, AlignedArray* out) {
   UnaryEwiseOp(a, out, [&](scalar_t e) {
     return e / val;
+  });
+}
+
+/**
+ * @brief Elementwise power: out = a ** b.
+ */
+void EwisePower(const AlignedArray& a, const AlignedArray& b, AlignedArray* out) {
+  BinaryEwiseOp(a, b, out, [](scalar_t e1, scalar_t e2) {
+    return std::pow(e1, e2);
   });
 }
 
@@ -566,6 +575,7 @@ PYBIND11_MODULE(ndarray_backend_cpu, m) {
   m.def("scalar_mul", ScalarMul);
   m.def("ewise_div", EwiseDiv);
   m.def("scalar_div", ScalarDiv);
+  m.def("ewise_power", EwisePower);
   m.def("scalar_power", ScalarPower);
 
   m.def("ewise_maximum", EwiseMaximum);

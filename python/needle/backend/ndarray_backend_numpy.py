@@ -1,14 +1,14 @@
 import numpy as np
 
 __device_name__ = "numpy"
-_dtype = np.float32
+_dtype = np.float64
 _dtype_size = np.dtype(_dtype).itemsize
 
 
 class Array:
     def __init__(self, size: int):
         # use numpy array as buffer to store the data
-        self.buffer = np.empty(size, dtype=np.float32)
+        self.buffer = np.empty(size, dtype=np.float64)
 
     @property
     def size(self) -> int:
@@ -239,8 +239,23 @@ def scalar_div(a: Array, val: float, out: Array) -> None:
     out.buffer[:] = a.buffer / val
 
 
+def ewise_power(a: Array, b: Array, out: Array) -> None:
+    """Elementwise power ``out = a ** b`` for compact buffers.
+
+    Parameters
+    ----------
+    a : Array
+        Base values (compact).
+    b : Array
+        Exponent values (compact).
+    out : Array
+        Output (compact), same size as ``a`` and ``b``.
+    """
+    out.buffer[:] = a.buffer**b.buffer
+
+
 def scalar_power(a: Array, val: float, out: Array) -> None:
-    """Elementwise power ``out = a ** val`` for compact buffers.
+    """Elementwise power with scalar exponent ``out = a ** val`` for compact buffers.
 
     Parameters
     ----------
@@ -285,7 +300,7 @@ def scalar_maximum(a: Array, val: float, out: Array) -> None:
 
 
 def ewise_eq(a: Array, b: Array, out: Array) -> None:
-    """Elementwise equality test ``out = (a == b)`` stored as float32.
+    """Elementwise equality test ``out = (a == b)`` stored as float64.
 
     Parameters
     ----------
@@ -300,7 +315,7 @@ def ewise_eq(a: Array, b: Array, out: Array) -> None:
 
 
 def scalar_eq(a: Array, val: float, out: Array) -> None:
-    """Elementwise equality to scalar ``out = (a == val)`` stored as float32.
+    """Elementwise equality to scalar ``out = (a == val)`` stored as float64.
 
     Parameters
     ----------
@@ -315,7 +330,7 @@ def scalar_eq(a: Array, val: float, out: Array) -> None:
 
 
 def ewise_ge(a: Array, b: Array, out: Array) -> None:
-    """Elementwise comparison ``out = (a >= b)`` stored as float32.
+    """Elementwise comparison ``out = (a >= b)`` stored as float64.
 
     Parameters
     ----------
@@ -330,7 +345,7 @@ def ewise_ge(a: Array, b: Array, out: Array) -> None:
 
 
 def scalar_ge(a: Array, val: float, out: Array) -> None:
-    """Elementwise comparison to scalar ``out = (a >= val)`` stored as float32.
+    """Elementwise comparison to scalar ``out = (a >= val)`` stored as float64.
 
     Parameters
     ----------
