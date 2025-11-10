@@ -14,6 +14,9 @@ class Array:
     def size(self) -> int:
         return self.buffer.size
 
+    def ptr(self) -> int:
+        return self.buffer.ctypes.data
+
 
 def to_numpy(
     a: Array, shape: tuple[int, ...], strides: tuple[int, ...], offset: int
@@ -391,19 +394,19 @@ def matmul(a: Array, b: Array, out: Array, m: int, n: int, p: int) -> None:
     Parameters
     ----------
     a : Array
-        Left matrix storage containing ``A`` flattened with shape ``(m, p)``.
+        Left matrix storage containing ``A`` flattened with shape ``(m, n)``.
     b : Array
-        Right matrix storage containing ``B`` flattened with shape ``(p, n)``.
+        Right matrix storage containing ``B`` flattened with shape ``(n, p)``.
     out : Array
-        Output storage for ``C = A @ B`` flattened with shape ``(m * n,)``.
+        Output storage for ``C = A @ B`` flattened with shape ``(m * p,)``.
     m : int
         Number of rows of ``A`` and ``C``.
     n : int
-        Number of columns of ``B`` and ``C``.
-    p : int
         Shared inner dimension of ``A`` and ``B``.
+    p : int
+        Number of columns of ``A`` and ``C``.
     """
-    out.buffer[:] = (a.buffer.reshape(m, p) @ b.buffer.reshape(p, n)).reshape(-1)
+    out.buffer[:] = (a.buffer.reshape(m, n) @ b.buffer.reshape(n, p)).reshape(-1)
 
 
 def reduce_max(a: Array, out: Array, reduce_size: int) -> None:
