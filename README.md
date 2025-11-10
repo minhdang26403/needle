@@ -1,9 +1,7 @@
 # Needle
-Needle (Necessary Elements of Deep Learning) is a minimalist deep learning library built from scratch in Python, C++, and Metal. It is inspired by the Carnegie Mellon University course [11-785: Deep Learning Systems](https://dlsyscourse.org/).
+**Needle** (**Ne**cessary **E**lements of **D**eep **Le**arning) is a minimalist deep learning library built from scratch in Python, C++, and Metal. It is inspired by the Carnegie Mellon University course [CMU 10-414/714: Deep Learning Systems](https://dlsyscourse.org/).
 
-While deep learning systems like PyTorch and TensorFlow are widely available, understanding their internals is crucial for effective use and extension. This project is my "full-stack" journey to build, own, and understand every component of a modern framework, from the high-level Python API down to the low-level hardware kernels.
-
-As a systems engineer pivoting into MLSys, my goal is to trace the execution from `loss.backward()` all the way to the C++ and GPU operations that make it possible.
+While deep learning systems like PyTorch and TensorFlow are widely available, understanding their internals is crucial for effective use and extension. This project is a "full-stack" journey to build, own, and understand every component of a modern framework, from the high-level Python API down to the low-level hardware kernels.
 
 ### Follow My Journey
 
@@ -52,8 +50,8 @@ The main goal is to build, own, and trace a complete DL system to gain a fundame
 
 This project is broken down into eight distinct phases.
 
-* [ ] **Phase 0 — Decisions, scaffold, tooling**
-    * Set up `pyproject.toml` (`scikit-build-core`, `pybind11`), CMake, `pytest`, `pre-commit`.
+* [x] **Phase 0 — Decisions, scaffold, tooling**
+    * Set up `pyproject.toml` (`scikit-build-core`, `pybind11`), CMake, `pytest`.
     * Set up CI stub on GitHub Actions.
 
 * [ ] **Phase 1 — Containers only (no autograd)**
@@ -63,7 +61,7 @@ This project is broken down into eight distinct phases.
 
 * [ ] **Phase 2 — Compute graph and autograd**
     * Implement the autograd "tape" and `backward()` traversal.
-    * Define `Op` base class with `forward()` and `backward()` contracts.
+    * Define `Op` base class with `compute()` and `gradient()` contracts.
     * Implement core ops (math, reduce, broadcast) and their gradients.
     * Write gradient checks using finite-differences.
 
