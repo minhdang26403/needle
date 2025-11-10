@@ -105,7 +105,7 @@ This project is broken down into eight distinct phases.
     * Data: CIFAR10/PTB datasets, transforms, simple DataLoader.
     * Integration tests: small training loops showing decreasing loss.
 
-* [ ] **Phase 4 — C++ CPU backend**
+* [x] **Phase 4 — C++ CPU backend**
     * C++ `NDArray` (shape/stride, allocation), kernels for ewise unary/binary, broadcast, reductions, matmul (optional BLAS), conv2d.
     * pybind11 bindings, module `needle_cpu`, device selection.
     * Ensure all tests pass on the `device("cpu")`.
