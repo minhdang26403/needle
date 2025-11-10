@@ -1,9 +1,9 @@
 import math
-from typing import Any, Callable, Union, cast
+from typing import Any, Callable, List, Optional, Union, cast
 
 import numpy as np
 
-from .device import Device, default_device
+from needle.backend.device import Device, default_device
 
 
 class NDArray:
@@ -138,8 +138,8 @@ class NDArray:
 
     @property
     def dtype(self) -> str:
-        """str: Data type name (currently always ``'float32'``)."""
-        return "float32"
+        """str: Data type name (currently always ``'float64'``)."""
+        return "float64"
 
     @property
     def ndim(self) -> int:
@@ -295,7 +295,7 @@ class NDArray:
             self._offset,
         )
 
-    def permute(self, new_axes: tuple[int, ...]) -> "NDArray":
+    def permute(self, new_axes: Union[tuple[int, ...], List[int]]) -> "NDArray":
         """Permute dimensions according to ``new_axes`` without copying memory.
 
         Parameters
@@ -544,11 +544,11 @@ class NDArray:
         """Elementwise negation."""
         return self * (-1)
 
-    def __pow__(self, other: float) -> "NDArray":
+    def __pow__(self, other: Union["NDArray", float]) -> "NDArray":
         """Elementwise exponentiation by a scalar."""
-        out = NDArray.make(self.shape, device=self.device)
-        self.device.scalar_power(self.compact()._handle, other, out._handle)
-        return out
+        return self.ewise_or_scalar(
+            other, self.device.ewise_power, self.device.scalar_power
+        )
 
     def maximum(self, other: Union["NDArray", float]) -> "NDArray":
         """Elementwise maximum."""
@@ -576,11 +576,11 @@ class NDArray:
 
     ### Binary operations
     def __eq__(self, other: Union["NDArray", float]) -> "NDArray":  # type: ignore[override]
-        """Elementwise equality returning a float32 mask (1.0 or 0.0)."""
+        """Elementwise equality returning a float64 mask (1.0 or 0.0)."""
         return self.ewise_or_scalar(other, self.device.ewise_eq, self.device.scalar_eq)
 
     def __ge__(self, other: Union["NDArray", float]) -> "NDArray":
-        """Elementwise greater-or-equal returning a float32 mask (1.0 or 0.0)."""
+        """Elementwise greater-or-equal returning a float64 mask (1.0 or 0.0)."""
         return self.ewise_or_scalar(other, self.device.ewise_ge, self.device.scalar_ge)
 
     def __ne__(self, other: Union["NDArray", float]) -> "NDArray":  # type: ignore[override]
@@ -641,8 +641,8 @@ class NDArray:
     ### Reductions, i.e., sum/max over all element or over a given axis
     def reduce_view_out(
         self, axis: int | tuple[int, ...] | list[int] | None, keepdims: bool = False
-    ) -> tuple["NDArray", "NDArray"]:
-        """Prepare a compact reduction view and corresponding output array.
+    ) -> tuple["NDArray", "NDArray", int]:
+        """Prepare a compact reduction view, output array, and reduce_size.
 
         Parameters
         ----------
@@ -659,30 +659,48 @@ class NDArray:
             such that the last dimension is reduced, and ``out`` is the output
             array with appropriate shape.
         """
-        if isinstance(axis, tuple) and not axis:
-            raise ValueError("Empty axis in reduce")
 
+        # 1. Normalize 'axis' into a set of axes to reduce
         if axis is None:
-            view = self.compact().reshape(
-                (1,) * (self.ndim - 1) + (math.prod(self.shape),)
-            )
-            out = NDArray.make((1,), device=self.device)
+            # Case 1: Reduce all axes
+            axis_set = set(range(self.ndim))
         else:
-            if isinstance(axis, (tuple, list)):
-                assert len(axis) == 1, "Only support reduction over a single axis"
-                axis = axis[0]
+            # Case 2: Reduce specific axes
+            if isinstance(axis, int):
+                axis = (axis,)
+            if isinstance(axis, list):
+                axis = tuple(axis)
+            axis_set = set(axis)
 
-            view = self.permute(
-                tuple(a for a in range(self.ndim) if a != axis) + (axis,)
-            )
-            out = NDArray.make(
-                tuple(1 if i == axis else s for i, s in enumerate(self.shape))
-                if keepdims
-                else tuple(s for i, s in enumerate(self.shape) if i != axis),
-                device=self.device,
-            )
+        # 2. Partition axes into "keep" and "reduce"
+        keep_axes = tuple(a for a in range(self.ndim) if a not in axis_set)
+        reduce_axes = tuple(a for a in range(self.ndim) if a in axis_set)
 
-        return view, out
+        # 3. Create the permuted "view"
+        # This is the same trick as before, just generalized!
+        # It moves all reduction axes to the end.
+        permute_order = keep_axes + reduce_axes
+        view = self.permute(permute_order)
+
+        # 4. Calculate the total size of the reduced dimensions
+        reduce_size = math.prod(view.shape[len(keep_axes) :])
+        if reduce_size == 0:
+            reduce_size = 1  # Handle empty arrays
+
+        # 5. Create the output array
+        if keepdims:
+            out_shape = tuple(
+                1 if i in axis_set else s for i, s in enumerate(self.shape)
+            )
+        else:
+            out_shape = tuple(self.shape[i] for i in keep_axes)
+            # Handle full reduction (keep_axes is empty)
+            if not out_shape:
+                out_shape = (1,)  # Match original logic
+
+        out = NDArray.make(out_shape, device=self.device)
+
+        return view, out, reduce_size
 
     def sum(
         self,
@@ -704,8 +722,8 @@ class NDArray:
         NDArray
             The reduced array.
         """
-        view, out = self.reduce_view_out(axis, keepdims=keepdims)
-        self.device.reduce_sum(view.compact()._handle, out._handle, view.shape[-1])
+        view, out, reduce_size = self.reduce_view_out(axis, keepdims=keepdims)
+        self.device.reduce_sum(view.compact()._handle, out._handle, reduce_size)
         return out
 
     def max(
@@ -728,13 +746,15 @@ class NDArray:
         NDArray
             The reduced array.
         """
-        view, out = self.reduce_view_out(axis, keepdims=keepdims)
-        self.device.reduce_max(view.compact()._handle, out._handle, view.shape[-1])
+        view, out, reduce_size = self.reduce_view_out(axis, keepdims=keepdims)
+        self.device.reduce_max(view.compact()._handle, out._handle, reduce_size)
         return out
 
 
-def array(a: Any, dtype: str = "float32", device: Device | None = None) -> NDArray:
+def array(
+    a: Any, *, device: Optional[Device] = None, dtype: Optional[str] = None
+) -> NDArray:
     """Convenience methods to match numpy a bit more closely."""
-    dtype = "float32" if dtype is None else dtype
-    assert dtype == "float32"
+    dtype = "float64" if dtype is None else dtype
+    assert dtype == "float64"
     return NDArray(a, device=device)

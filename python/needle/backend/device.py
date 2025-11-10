@@ -1,7 +1,7 @@
 import importlib
 from typing import Any, Optional
 
-from . import ndarray_backend_numpy
+from needle.backend import ndarray_backend_numpy
 
 # Try to import the native CPU backend dynamically (may not be built in dev)
 try:
