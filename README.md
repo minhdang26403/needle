@@ -42,7 +42,39 @@ The main goal is to build, own, and trace a complete DL system to gain a fundame
 * **Bindings:** `pybind11`
 * **Build System:** `scikit-build-core` & `CMake`
 * **Backends:** C++, NumPy, Objective-C++ (Metal), CUDA
-* **Testing & Linting:** `pytest`, `mypy`, `ruff`, `pre-commit`
+* **Testing & Linting:** `pytest`, `mypy`, `ruff` (optional: `pre-commit`)
+* **Env:** Conda (`environment.yml`) + pip for Python deps
+
+---
+
+## 📦 Repository Layout
+
+```bash
+repo-root/
+  python/needle/           # Python package
+  src/cpu/                 # Native CPU backend (CMake targets)
+  src/metal/               # Native Metal backend (CMake targets)
+  src/cuda/                # Native CUDA backend (CMake targets)
+  tests/                   # Unit + integration tests
+  examples/
+  benchmarks/
+  docs/
+  environment.yml          # Conda env for Python/CMake/Ninja
+  pyproject.toml           # Packaging + tool configs (ruff/mypy/pytest)
+  CMakeLists.txt           # Root CMake, adds src/{cpu,metal,cuda}
+  pytest.ini               # Pytest defaults
+  .github/workflows/ci.yml # CI: lint/type-check/test on macOS/Linux
+```
+
+---
+
+## ⚙️ Tooling and Configuration
+
+- `pyproject.toml`: Single-source packaging (name/version/metadata), scikit-build-core for CMake integration, and centralized configs for ruff/mypy/pytest. It also points to the modern package location `python/needle`.
+- `environment.yml`: Conda env for Python + build tools (CMake, Ninja). Python dependencies are installed via pip using `pyproject.toml` for consistent versions.
+- `pytest.ini`: Keeps tests quiet (`-q`) and scoped to the `tests` directory for consistent discovery locally and in CI.
+- `.github/workflows/ci.yml`: CI matrix (macOS, Ubuntu; Python 3.10–3.12) that runs lint, type-check, and tests on PRs and pushes.
+- Optional: Pre-commit hooks. If you add a `.pre-commit-config.yaml`, you can enable it with `pre-commit install` to auto-run ruff/mypy on commit.
 
 ---
 
@@ -54,47 +86,48 @@ This project is broken down into eight distinct phases.
     * Set up `pyproject.toml` (`scikit-build-core`, `pybind11`), CMake, `pytest`.
     * Set up CI stub on GitHub Actions.
 
-* [ ] **Phase 1 — Containers only (no autograd)**
-    * Implement `NDArray` concept with a NumPy backend.
-    * Implement `Tensor` container (no grad) holding the backend array.
-    * Unit tests for ops, shapes, strides, and broadcasting.
+* [x] **Phase 1 — Containers only (no autograd)**
+    * Define backend protocol (NDArray): shape, strides, dtype, device, allocate/copy, reshape, transpose, elementwise add/mul, matmul, reduce sum/mean, broadcasting rules.
+    * Implement NumPy backend to this protocol.
+    * Tests: shape/stride invariants, broadcasting semantics, dtype/device handling, to/from numpy parity.
 
 * [ ] **Phase 2 — Compute graph and autograd**
-    * Implement the autograd "tape" and `backward()` traversal.
-    * Define `Op` base class with `compute()` and `gradient()` contracts.
-    * Implement core ops (math, reduce, broadcast) and their gradients.
-    * Write gradient checks using finite-differences.
+    * Implement `Tensor` (no grad) that wraps backend arrays, dtype/device conversions, to/from NumPy.
+    * Autograd engine: tape data structures, grad mode/no_grad, topological sort, backward traversal, accumulation, default grad for scalars.
+    * `Op` base API with `compute()` and `gradient()` contracts.
+    * Core ops with gradients: add, mul, neg, matmul, sum/mean, reshape, transpose, broadcast_to; plus log/exp/relu/sigmoid/tanh/softmax; argmax (non-diff).
+    * Gradient checks: finite differences on small random tensors; edge cases for broadcasting and reductions.
 
 * [ ] **Phase 3 — Optimizers, NN library, data pipeline**
-    * Implement Optimizers: `SGD`, `Adam`.
     * Implement `nn.Module`, `nn.Parameter`, `nn.Sequential`.
-    * Implement NN layers: `Linear`, `ReLU`, `Losses`, `Conv2d`, `RNN`.
-    * Implement `Dataset` and `DataLoader` for CIFAR10/PTB.
+    * Optimizers: SGD/Momentum/Adam, param groups, weight decay, step/zero_grad.
+    * Layers/losses: Linear, activations, MSE/CrossEntropy, Dropout, BatchNorm; Conv2d via im2col+GEMM; minimal RNN/LSTM/GRU.
+    * Data: CIFAR10/PTB datasets, transforms, simple DataLoader.
     * Integration tests: small training loops showing decreasing loss.
 
 * [ ] **Phase 4 — C++ CPU backend**
-    * Implement C++ `NDArray` with optimized kernels for all ops.
-    * Write `pybind11` bindings to expose the backend.
+    * C++ `NDArray` (shape/stride, allocation), kernels for ewise unary/binary, broadcast, reductions, matmul (optional BLAS), conv2d.
+    * pybind11 bindings, module `needle_cpu`, device selection.
     * Ensure all tests pass on the `device("cpu")`.
-    * Micro-benchmarks vs. NumPy.
+    * Cross-backend parity tests; micro-benchmarks vs. NumPy.
 
 * [ ] **Phase 5 — Metal backend (macOS)**
-    * Write Objective-C++ bridge to Metal.
-    * Implement Metal kernels for key ops (ewise, reduce, matmul, conv).
-    * Enable universal2 wheels.
+    * Objective-C++ bridge, buffers/queues/pipelines; kernels for copy/ewise/reduce/matmul/conv subset.
     * Ensure all tests pass on `device("metal")`.
 
 * [ ] **Phase 6 — CUDA backend (optional)**
-    * Implement CUDA kernels; integrate `cuBLAS` and `cuDNN`.
+    * CUDA kernels, cuBLAS (matmul), optional cuDNN (conv).
     * Gate build via `NEEDLE_ENABLE_CUDA=ON`.
     * Ensure all tests pass on `device("cuda")`.
 
 * [ ] **Phase 7 — Efficiency experiments (R&D)**
-    * Explore kernel fusion, quantization (PTQ), KV Caching, and FlashAttention-like concepts.
+    * Kernel fusion (Python-level → C++ passes), profiling harness.
+    * PTQ quantization (Linear/Conv), calibration, quantized kernels.
+    * KV cache utilities and attention improvements; explore FlashAttention-like approach.
     * Benchmark performance improvements.
 
 * [ ] **Phase 8 — Benchmarks, docs, blog, release**
-    * Finalize documentation and tutorials.
+    * Ops microbenchmarks; model throughput/latency across backends.
     * Publish blog posts on design decisions and performance.
     * Release v1.0 to PyPI.
 
