@@ -91,7 +91,7 @@ This project is broken down into eight distinct phases.
     * Implement NumPy backend to this protocol.
     * Tests: shape/stride invariants, broadcasting semantics, dtype/device handling, to/from numpy parity.
 
-* [ ] **Phase 2 — Compute graph and autograd**
+* [x] **Phase 2 — Compute graph and autograd**
     * Implement `Tensor` (no grad) that wraps backend arrays, dtype/device conversions, to/from NumPy.
     * Autograd engine: tape data structures, grad mode/no_grad, topological sort, backward traversal, accumulation, default grad for scalars.
     * `Op` base API with `compute()` and `gradient()` contracts.
