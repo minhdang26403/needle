@@ -9,6 +9,12 @@ from .init_basic import (
     zeros,
     zeros_like,
 )
+from .init_initializers import (
+    kaiming_normal,
+    kaiming_uniform,
+    xavier_normal,
+    xavier_uniform,
+)
 
 __all__ = [
     "rand",
@@ -20,4 +26,8 @@ __all__ = [
     "one_hot",
     "zeros_like",
     "ones_like",
+    "xavier_uniform",
+    "xavier_normal",
+    "kaiming_uniform",
+    "kaiming_normal",
 ]
