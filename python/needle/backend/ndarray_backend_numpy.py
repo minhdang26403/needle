@@ -1,14 +1,14 @@
 import numpy as np
 
 __device_name__ = "numpy"
-_dtype = np.float64
+_dtype = np.float32
 _dtype_size = np.dtype(_dtype).itemsize
 
 
 class Array:
     def __init__(self, size: int):
         # use numpy array as buffer to store the data
-        self.buffer = np.empty(size, dtype=np.float64)
+        self.buffer = np.empty(size, dtype=np.float32)
 
     @property
     def size(self) -> int:
@@ -300,7 +300,7 @@ def scalar_maximum(a: Array, val: float, out: Array) -> None:
 
 
 def ewise_eq(a: Array, b: Array, out: Array) -> None:
-    """Elementwise equality test ``out = (a == b)`` stored as float64.
+    """Elementwise equality test ``out = (a == b)`` stored as float32.
 
     Parameters
     ----------
@@ -315,7 +315,7 @@ def ewise_eq(a: Array, b: Array, out: Array) -> None:
 
 
 def scalar_eq(a: Array, val: float, out: Array) -> None:
-    """Elementwise equality to scalar ``out = (a == val)`` stored as float64.
+    """Elementwise equality to scalar ``out = (a == val)`` stored as float32.
 
     Parameters
     ----------
@@ -330,7 +330,7 @@ def scalar_eq(a: Array, val: float, out: Array) -> None:
 
 
 def ewise_ge(a: Array, b: Array, out: Array) -> None:
-    """Elementwise comparison ``out = (a >= b)`` stored as float64.
+    """Elementwise comparison ``out = (a >= b)`` stored as float32.
 
     Parameters
     ----------
@@ -345,7 +345,7 @@ def ewise_ge(a: Array, b: Array, out: Array) -> None:
 
 
 def scalar_ge(a: Array, val: float, out: Array) -> None:
-    """Elementwise comparison to scalar ``out = (a >= val)`` stored as float64.
+    """Elementwise comparison to scalar ``out = (a >= val)`` stored as float32.
 
     Parameters
     ----------
@@ -454,35 +454,35 @@ def reduce_sum(a: Array, out: Array, reduce_size: int) -> None:
     out.buffer[:] = np.sum(a.buffer.reshape(-1, reduce_size), axis=1)
 
 
-def zeros(*shape: int, dtype: str = "float64") -> np.ndarray:
+def zeros(*shape: int, dtype: str = "float32") -> np.ndarray:
     return np.zeros(shape, dtype=dtype)
 
 
-def ones(*shape: int, dtype: str = "float64") -> np.ndarray:
+def ones(*shape: int, dtype: str = "float32") -> np.ndarray:
     return np.ones(shape, dtype=dtype)
 
 
 def randn(*shape: int) -> np.ndarray:
     # note: numpy doesn't support types within standard random routines, and
-    # .astype("float64") does work if we're generating a singleton
+    # .astype("float32") does work if we're generating a singleton
     return np.random.randn(*shape)
 
 
 def rand(*shape: int) -> np.ndarray:
     # note: numpy doesn't support types within standard random routines, and
-    # .astype("float64") does work if we're generating a singleton
+    # .astype("float32") does work if we're generating a singleton
     return np.random.rand(*shape)
 
 
-def one_hot(n: int, i: int, dtype: str = "float64") -> np.ndarray:
+def one_hot(n: int, i: int, dtype: str = "float32") -> np.ndarray:
     return np.array(np.eye(n, dtype=dtype)[i])
 
 
-def empty(shape: tuple[int, ...], dtype: str = "float64") -> np.ndarray:
+def empty(shape: tuple[int, ...], dtype: str = "float32") -> np.ndarray:
     return np.empty(shape, dtype=dtype)
 
 
 def full(
-    shape: tuple[int, ...], fill_value: float, dtype: str = "float64"
+    shape: tuple[int, ...], fill_value: float, dtype: str = "float32"
 ) -> np.ndarray:
     return np.full(shape, fill_value, dtype=dtype)

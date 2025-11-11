@@ -138,8 +138,8 @@ class NDArray:
 
     @property
     def dtype(self) -> str:
-        """str: Data type name (currently always ``'float64'``)."""
-        return "float64"
+        """str: Data type name (currently always ``'float32'``)."""
+        return "float32"
 
     @property
     def ndim(self) -> int:
@@ -576,11 +576,11 @@ class NDArray:
 
     ### Binary operations
     def __eq__(self, other: Union["NDArray", float]) -> "NDArray":  # type: ignore[override]
-        """Elementwise equality returning a float64 mask (1.0 or 0.0)."""
+        """Elementwise equality returning a float32 mask (1.0 or 0.0)."""
         return self.ewise_or_scalar(other, self.device.ewise_eq, self.device.scalar_eq)
 
     def __ge__(self, other: Union["NDArray", float]) -> "NDArray":
-        """Elementwise greater-or-equal returning a float64 mask (1.0 or 0.0)."""
+        """Elementwise greater-or-equal returning a float32 mask (1.0 or 0.0)."""
         return self.ewise_or_scalar(other, self.device.ewise_ge, self.device.scalar_ge)
 
     def __ne__(self, other: Union["NDArray", float]) -> "NDArray":  # type: ignore[override]
@@ -755,6 +755,6 @@ def array(
     a: Any, *, device: Optional[Device] = None, dtype: Optional[str] = None
 ) -> NDArray:
     """Convenience methods to match numpy a bit more closely."""
-    dtype = "float64" if dtype is None else dtype
-    assert dtype == "float64"
+    dtype = "float32" if dtype is None else dtype
+    assert dtype == "float32"
     return NDArray(a, device=device)

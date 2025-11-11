@@ -9,7 +9,7 @@ def rand(
     low: float = 0.0,
     high: float = 1.0,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate random numbers uniform between low and high"""
@@ -23,7 +23,7 @@ def randn(
     mean: float = 0.0,
     std: float = 1.0,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate random normal with specified mean and std deviation"""
@@ -36,7 +36,7 @@ def constant(
     *shape: int,
     c: float = 1.0,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate constant Tensor"""
@@ -48,7 +48,7 @@ def constant(
 def ones(
     *shape: int,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate all-ones Tensor"""
@@ -60,7 +60,7 @@ def ones(
 def zeros(
     *shape: int,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate all-zeros Tensor"""
@@ -73,7 +73,7 @@ def randb(
     *shape: int,
     p: float = 0.5,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate binary random Tensor"""
@@ -86,7 +86,7 @@ def one_hot(
     n: int,
     i: Tensor,
     device: Optional[Device] = None,
-    dtype: str = "float64",
+    dtype: str = "float32",
     requires_grad: bool = False,
 ) -> Tensor:
     """Generate one-hot encoding Tensor"""
