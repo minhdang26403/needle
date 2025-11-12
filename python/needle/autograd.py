@@ -38,7 +38,7 @@ class Tensor:
     cached_data: Optional[NDArray]
     requires_grad: bool
 
-    grad: "Tensor"
+    grad: Optional["Tensor"]
 
     def __init__(
         self,
@@ -118,6 +118,21 @@ class Tensor:
             requires_grad=requires_grad,
         )
         return tensor
+
+    @property
+    def data(self) -> "Tensor":
+        """Return a new tensor that shares the data but detaches from the graph."""
+        return self.detach()
+
+    @data.setter
+    def data(self, value: "Tensor") -> None:
+        """Set the data of the tensor."""
+        assert isinstance(value, Tensor)
+        assert value.dtype == self.dtype, "%s %s" % (
+            value.dtype,
+            self.dtype,
+        )
+        self.cached_data = value.realize_cached_data()
 
     def detach(self) -> "Tensor":
         """Create a new tensor that shares the data but detaches from the graph."""
