@@ -282,6 +282,14 @@ class Tensor:
         """Sum reduction over specified axes (or all axes if None)."""
         return ops.Summation(axes, keepdims)(self)
 
+    def max(
+        self,
+        axes: Optional[Union[int, tuple[int, ...], list[int]]] = None,
+        keepdims: bool = False,
+    ) -> "Tensor":
+        """Maximum reduction over specified axes (or all axes if None)."""
+        return ops.Max(axes, keepdims)(self)
+
     def broadcast_to(self, shape: tuple[int, ...]) -> "Tensor":
         """Return a broadcasted view to `shape` (no data copy)."""
         return ops.BroadcastTo(shape)(self)
@@ -297,6 +305,20 @@ class Tensor:
     def transpose(self, axes: Optional[tuple[int, ...]] = None) -> "Tensor":
         """Return a transposed view (swap last two dims by default)."""
         return ops.Transpose(axes)(self)
+
+    def relu(self) -> "Tensor":
+        """Rectified Linear Unit: max(x, 0)."""
+        return ops.ReLU()(self)
+
+    def logsumexp(
+        self, axes: Optional[Union[int, tuple[int, ...], list[int]]] = None
+    ) -> "Tensor":
+        """Log-sum-exp reduction over specified axes (or all axes if None)."""
+        return ops.LogSumExp(axes)(self)
+
+    def logsoftmax(self) -> "Tensor":
+        """Log-softmax reduction."""
+        return ops.LogSoftmax()(self)
 
     __radd__ = __add__
     __rmul__ = __mul__
