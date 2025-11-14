@@ -1,6 +1,6 @@
 from .data_basic import DataLoader, Dataset
 from .data_transforms import RandomCrop, RandomFlipHorizontal, Transform
-from .datasets import MNISTDataset
+from .datasets import MNISTDataset, NDArrayDataset
 
 __all__ = [
     "DataLoader",
@@ -9,4 +9,5 @@ __all__ = [
     "RandomFlipHorizontal",
     "RandomCrop",
     "MNISTDataset",
+    "NDArrayDataset",
 ]

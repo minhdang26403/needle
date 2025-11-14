@@ -1,8 +1,10 @@
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
-from ..autograd import Tensor
+from needle.autograd import Tensor
+
+from .data_transforms import Transform
 
 
 class Dataset:
@@ -13,13 +15,13 @@ class Dataset:
     :meth:`__len__`, which is expected to return the size of the dataset.
     """
 
-    def __init__(self, transforms: list[Callable[[Any], Any]] | None = None):
+    def __init__(self, transforms: list[Transform] | None = None):
         self.transforms = transforms
 
-    def __getitem__(self, index: int) -> tuple[np.ndarray, ...]:
+    def __getitem__(self, index: slice | int) -> tuple[np.ndarray, ...]:
         raise NotImplementedError
 
-    def __len__(self) -> int:
+    def __len__(self) -> Any:
         raise NotImplementedError
 
     def apply_transforms(self, x: Any) -> Any:

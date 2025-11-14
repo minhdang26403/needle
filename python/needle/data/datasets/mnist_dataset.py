@@ -1,9 +1,9 @@
 import gzip
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 
-from ..data_basic import Dataset
+from needle.data import Dataset, Transform
 
 
 class MNISTDataset(Dataset):
@@ -11,7 +11,7 @@ class MNISTDataset(Dataset):
         self,
         image_filename: str,
         label_filename: str,
-        transforms: list[Callable[[Any], Any]] | None = None,
+        transforms: list[Transform] | None = None,
     ):
         super().__init__(transforms)
 
@@ -41,7 +41,7 @@ class MNISTDataset(Dataset):
         self.num_samples = num_images
         self.transforms = transforms
 
-    def __getitem__(self, index: int) -> tuple[np.ndarray, ...]:
+    def __getitem__(self, index: slice | int) -> tuple[np.ndarray, ...]:
         image = self.X[index]
         label = self.y[index]
         if self.transforms is not None:
@@ -50,6 +50,5 @@ class MNISTDataset(Dataset):
             image = self.apply_transforms(image.reshape(28, 28, 1)).flatten()
         return image, label
 
-    def __len__(self) -> int:
-        assert isinstance(self.num_samples, int)
+    def __len__(self) -> Any:
         return self.num_samples
