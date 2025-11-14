@@ -39,6 +39,8 @@ class SGD(Optimizer):
             grad = p.grad.data + self.weight_decay * p.data
 
             # Get the old velocity.
+            if i not in self.u:
+                self.u[i] = grad * 0
             v_old = self.u[i]
 
             # Compute the new velocity using the momentum rule
@@ -85,6 +87,11 @@ class Adam(Optimizer):
         for i, p in enumerate(self.params):
             assert p.grad is not None
             grad = p.grad.data + self.weight_decay * p.data
+
+            if i not in self.m:
+                self.m[i] = grad * 0
+            if i not in self.v:
+                self.v[i] = grad * 0
 
             # Update the first moment and second moment estimates.
             self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * grad
