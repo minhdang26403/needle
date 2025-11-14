@@ -147,29 +147,33 @@ class Transpose(TensorOp):
 
 
 class Reshape(TensorOp):
-    """View a tensor with a new shape (no data copy)."""
+    """Reshape a tensor to a new shape."""
 
     def __init__(self, shape: tuple[int, ...]) -> None:
         self.shape = shape
 
     def compute(self, *args: nd.NDArray) -> nd.NDArray:
         (a,) = args
-        return a.reshape(self.shape)
+        return a.compact().reshape(self.shape)
 
     def gradient(self, out_grad: "Tensor", node: "Tensor") -> "Tensor":
         return out_grad.reshape(node.inputs[0].shape)
 
 
 class BroadcastTo(TensorOp):
-    """Broadcast a tensor to a target shape (no data copy)."""
+    """Broadcast a tensor to a target shape."""
 
     def __init__(self, shape: tuple[int, ...]) -> None:
         self.shape = shape
 
     def compute(self, *args: nd.NDArray) -> nd.NDArray:
         (a,) = args
-        added_axes = (1,) * (len(self.shape) - len(a.shape))
-        return a.reshape(added_axes + a.shape).broadcast_to(self.shape)
+        ndiff = len(self.shape) - len(a.shape)
+        if ndiff > 0:
+            added_axes = (1,) * ndiff
+            # need to reassign since compact returns a new copy
+            a = a.compact().reshape(added_axes + a.shape)
+        return a.broadcast_to(self.shape)
 
     def gradient(self, out_grad: "Tensor", node: "Tensor") -> "Tensor":
         input_shape = node.inputs[0].shape
@@ -229,6 +233,29 @@ class Summation(TensorOp):
 
         # 3. Broadcast it to the original input_shape
         return reshaped_grad.broadcast_to(input_shape)
+
+
+class Max(TensorOp):
+    """Maximum reduction over specified axes (or all axes if None)."""
+
+    def __init__(
+        self,
+        axes: Optional[Union[int, Tuple[int, ...], List[int]]] = None,
+        keepdims: bool = False,
+    ) -> None:
+        self.axes = axes
+        self.keepdims = keepdims
+
+    def compute(self, *args: nd.NDArray) -> nd.NDArray:
+        (a,) = args
+        return a.max(self.axes, keepdims=self.keepdims)
+
+    def gradient(self, out_grad: "Tensor", node: "Tensor") -> "Tensor":
+        a = node.inputs[0]
+        max_a = a.max(self.axes, keepdims=self.keepdims)
+        # Only the max value will have a gradient of 1, all other values will have a
+        # gradient of 0.
+        return out_grad.broadcast_to(a.shape) * (a == max_a)
 
 
 class MatMul(TensorOp):
@@ -333,4 +360,7 @@ class ReLU(TensorOp):
 
     def gradient(self, out_grad: "Tensor", node: "Tensor") -> "Tensor":
         a = node.inputs[0]
+        # lazy import to avoid circular import
+        from needle.autograd import Tensor
+
         return out_grad * Tensor(a.realize_cached_data() > 0)

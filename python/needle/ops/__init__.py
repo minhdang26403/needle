@@ -1,6 +1,7 @@
 """Operation stubs; implemented in later phases."""
 
 from .op import TensorOp
+from .ops_logarithmic import LogSoftmax, LogSumExp
 from .ops_mathematic import (
     AddScalar,
     BroadcastTo,
@@ -12,6 +13,7 @@ from .ops_mathematic import (
     Exp,
     Log,
     MatMul,
+    Max,
     MulScalar,
     Negate,
     PowerScalar,
@@ -40,4 +42,7 @@ __all__ = [
     "Log",
     "Exp",
     "ReLU",
+    "LogSoftmax",
+    "LogSumExp",
+    "Max",
 ]
