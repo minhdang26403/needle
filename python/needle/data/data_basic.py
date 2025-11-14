@@ -1,1 +1,79 @@
-"""Data utilities to be implemented later."""
+from typing import Any, Callable
+
+import numpy as np
+
+from ..autograd import Tensor
+
+
+class Dataset:
+    r"""An abstract class representing a `Dataset`.
+
+    All subclasses should overwrite :meth:`__getitem__`, supporting fetching a
+    data sample for a given key. Subclasses must also overwrite
+    :meth:`__len__`, which is expected to return the size of the dataset.
+    """
+
+    def __init__(self, transforms: list[Callable[[Any], Any]] | None = None):
+        self.transforms = transforms
+
+    def __getitem__(self, index: int) -> tuple[np.ndarray, ...]:
+        raise NotImplementedError
+
+    def __len__(self) -> int:
+        raise NotImplementedError
+
+    def apply_transforms(self, x: Any) -> Any:
+        if self.transforms is not None:
+            # apply the transforms
+            for tform in self.transforms:
+                x = tform(x)
+        return x
+
+
+class DataLoader:
+    r"""
+    Data loader. Combines a dataset and a sampler, and provides an iterable over
+    the given dataset.
+    Args:
+        dataset (Dataset): dataset from which to load the data.
+        batch_size (int, optional): how many samples per batch to load
+            (default: ``1``).
+        shuffle (bool, optional): set to ``True`` to have the data reshuffled
+            at every epoch (default: ``False``).
+    """
+
+    dataset: Dataset
+    batch_size: int | None
+
+    def __init__(
+        self,
+        dataset: Dataset,
+        batch_size: int = 1,
+        shuffle: bool = False,
+    ):
+        self.dataset = dataset
+        self.shuffle = shuffle
+        self.batch_size = batch_size
+        if not self.shuffle:
+            self.ordering = np.array_split(
+                np.arange(len(dataset)), range(batch_size, len(dataset), batch_size)
+            )
+
+    def __iter__(self) -> "DataLoader":
+        self.batch_index = 0
+        if self.shuffle:
+            arr = np.arange(len(self.dataset))
+            np.random.shuffle(arr)
+            assert self.batch_size is not None
+            self.ordering = np.array_split(
+                arr, range(self.batch_size, len(self.dataset), self.batch_size)
+            )
+        return self
+
+    def __next__(self) -> tuple[Tensor, ...]:
+        if self.batch_index == len(self.ordering):
+            raise StopIteration
+        batch_indices = self.ordering[self.batch_index]
+        samples = [self.dataset[i] for i in batch_indices]
+        self.batch_index += 1
+        return tuple(Tensor([x[i] for x in samples]) for i in range(len(samples[0])))
