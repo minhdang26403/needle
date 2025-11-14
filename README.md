@@ -98,7 +98,7 @@ This project is broken down into phases:
     * Core ops with gradients: add, mul, neg, `matmul`, `sum`, `reshape`, `transpose`, `broadcast_to`, `log`, `exp`, `relu`, elementwise power/divide.
     * Gradient checks using finite differences on small random tensors.
 
-* [ ] **Phase 3 — Optimizers, NN library, data pipeline**
+* [x] **Phase 3 — Optimizers, NN library, data pipeline**
     * Implement `nn.Module`, `nn.Parameter`, `nn.Sequential`.
     * Optimizers: SGD/Momentum/Adam, param groups, weight decay, step/zero_grad.
     * Layers/losses: Linear, activations, MSE/CrossEntropy, Dropout, BatchNorm; Conv2d via im2col+GEMM; minimal RNN/LSTM/GRU.
@@ -128,7 +128,6 @@ This project is broken down into phases:
 * [ ] **Phase 8 — Benchmarks, docs, blog, release**
     * Ops microbenchmarks; model throughput/latency across backends.
     * Publish blog posts on design decisions and performance.
-    * Release v1.0 to PyPI.
 
 ---
 
